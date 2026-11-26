@@ -14,6 +14,6 @@ export function workspace(root, role, page) {
   const actions = page.actions.filter(x => x.roles.includes(role));
   root.replaceChildren(titleBlock(page.module, page.title, page.detail),
     el('div',{class:'work '+page.layout},panel,
-      actions.length ? el('section',{class:'actions'},actions.map(x => actionForm(x, refresh))) : null));
+      actions.length ? el('section',{class:'actions'},actions.map(x => actionForm(x, refresh, panel))) : null));
   return refresh();
 }

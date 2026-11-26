@@ -10,6 +10,7 @@
 - 潮窗日历 `patrol_windows`，字段为 `route`（路线）、`opens`（签到起点 UTC+8）、`closes`（签到截止 UTC+8）、`opening_minute`（日内相位分钟）、`minutes`（窗口时长）、`phase`（日历相位）、`tag`（来源凭证）。模型约束位于 `backend/domain/patrol_windows_model.py`，规则位于 `patrol_windows_service.py`。
 - 路线限制 `trail_notices`，字段为 `route`（路线）、`begins`（封闭开始 UTC+8）、`until`（封闭结束 UTC+8）、`reason`（封闭缘由）、`status`（限制状态）。模型约束位于 `backend/domain/trail_notices_model.py`，规则位于 `trail_notices_service.py`。
 - 带队与签到 `lead_shifts`，字段为 `window`（关联潮窗）、`lead`（带队员）、`contact`（队内联络号）、`on_site`（到场时间 UTC+8）、`checkpoint`（签到检查点）、`state`（交接状态）。模型约束位于 `backend/domain/lead_shifts_model.py`，规则位于 `lead_shifts_service.py`。
+- 封路整组调班 `rework_batches`，字段为 `request_key`（签认幂等号）、`route`（受封路路线）、`plan`（重算落库的调班方案）。模型约束位于 `backend/domain/rework_batches_model.py`，规则位于 `rework_batches_service.py`。
 
 团队为模拟的8 人联络组，负责跑团沿堤路段的志愿巡查。
 
@@ -55,8 +56,11 @@ Compose 运行 Nginx、Python FastAPI、独立 Redis 消费进程、SQL 数据�
 | 潮窗日历 | `/patrol_windows` /patrol_windows/register-window，/patrol_windows/compare-phase | `frontend/src/pages/patrol_windows.js` |
 | 路线限制 | `/trail_notices` /trail_notices/post-closure，/trail_notices/lift-closure | `frontend/src/pages/trail_notices.js` |
 | 带队与签到 | `/lead_shifts` /lead_shifts/assign-lead，/lead_shifts/check-in，/lead_shifts/hand-back | `frontend/src/pages/lead_shifts.js` |
+| 封路整组调班 | `/rework_batches` /lead_shifts/rework-plan，/lead_shifts/rework-confirm | `frontend/src/pages/lead_shifts.js` |
 
 SQL 实体与约束在 `backend/domain` 下维护。前端使用原生 ES modules。核心算子为 周期正余弦距离。圆周距离为将开始分钟映射到单位圆后的欧氏弦长，再加绝对窗口时长差/180。仅比较同线路、同相位、已发生在目标潮窗之前的日历样本。
+
+封路整组调班只挑选同路、同潮相、起点晚于受影响窗且不与任何生效封闭重叠的后续潮窗；已签到（`已签到`/`已交回`）领班不在调班范围。方案以最小费用最大流求解：先让安置班次数量最大（受后续窗剩余名额约束），再在同等安置量下取总圆周距离最小的排法，名额不足的班次保留原窗并在方案中列出。`rework-plan` 只预览不占位；`rework-confirm` 在路线行锁内以最新封路、签到和名额重算后确认，整组换班与原名额释放在同一事务生效。`request_key` 唯一约束同次签认，重试或同键并发只回放既有批次，不重复占位。
 
 日期和点位为虚拟演练数据。UTC+8 日历用于跨午夜排班和历史相似性，不读取实测潮高，也不作可通行性判断。签到允许录入演练时钟以重放流程。
 

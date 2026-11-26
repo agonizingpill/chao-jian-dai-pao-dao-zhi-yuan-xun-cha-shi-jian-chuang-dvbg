@@ -73,3 +73,14 @@ label span { display:block; color:var(--soft); font-size:.875em }
 .night-axis::after{content:'';position:absolute;left:50%;border-left:1px dashed var(--soft);height:100%}
 .night-axis span{display:block;position:absolute;left:var(--start);width:var(--span);height:100%;background:var(--accent)}
 .patrol-timeline .ticks{display:flex;justify-content:space-between;color:var(--soft);font-size:.77rem;margin-block:.5rem .9rem}
+
+.rework-ledger{margin-top:1.5rem}
+.rework-output{margin-top:1.5rem}
+.rework-plan{margin-top:1rem;border-inline-start:3px solid var(--accent);padding:1rem;background:var(--tint)}
+.rework-plan.confirmed{border-inline-start-color:oklch(42% .11 150)}
+.rework-plan h4{margin:0 0 .4rem}
+.rework-plan h5{margin:.9rem 0 .35rem}
+.rework-plan table{margin-bottom:.4rem;font-size:.9rem}
+.rework-ok{color:oklch(42% .11 150)}
+.rework-unplaced{border-inline-start:3px solid oklch(45% .17 28);padding-inline-start:.6rem}
+.rework-unplaced ul{margin:.3rem 0 0;padding-inline-start:1.1rem}

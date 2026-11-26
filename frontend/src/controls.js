@@ -22,7 +22,7 @@ function parse(form, fields) {
     return [field.name, convert(raw)];
   }));
 }
-export function actionForm(action, refresh) {
+export function actionForm(action, refresh, panel) {
   const notice = status('');
   const button = el('button', {type:'submit'}, action.label);
   const form = el('form', {class:'action', id:action.name},
@@ -43,6 +43,9 @@ export function actionForm(action, refresh) {
         });
         if (result.status === 'rejected') throw new Error(result.detail);
         notice.textContent = '任务 ' + data.token + ' · ' + display(result.result);
+      } else if (action.render) {
+        notice.textContent = action.success;
+        action.render(panel, data);
       } else {
         notice.textContent = action.success + ' · ' + display(data.code ?? data.status);
       }
